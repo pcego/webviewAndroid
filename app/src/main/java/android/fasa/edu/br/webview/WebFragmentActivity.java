@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 public class WebFragmentActivity extends FragmentActivity {
 
     //Para acessar outra url substitua aqui
-    private static final String URL_SITE = "http://livearq.com.br/application/prelogin/";
+    private static final String URL_SITE = "sua_url";
     private WebView webView;
     private ProgressBar progress;
     // Variável para tratar efeito de reload por gesto
