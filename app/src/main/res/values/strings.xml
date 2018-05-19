@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">LiveArq</string>
+    <string name="alertMessage">Sem Conexão com a Internet.</string>
+    <string name="titleAlertMessage">Sem Internet</string>
+    <string name="buttonAlertTitle">Sair</string>
 </resources>

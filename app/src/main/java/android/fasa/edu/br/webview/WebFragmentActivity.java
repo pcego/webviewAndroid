@@ -1,9 +1,15 @@
 package android.fasa.edu.br.webview;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -13,19 +19,22 @@ import android.widget.ProgressBar;
 public class WebFragmentActivity extends FragmentActivity {
 
     //Para acessar outra url substitua aqui
-    private static final String URL_SITE = "sua_url";
+    private static final String URL_SITE = "https://livearq.com.br/application/prelogin/";
     private WebView webView;
     private ProgressBar progress;
+
     // Variável para tratar efeito de reload por gesto
     // deslizar para baixo
     protected SwipeRefreshLayout swipeRefresh;
     //Variável para configuração da webview
     private WebSettings settings;
+    private View dialogBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_web);
+
         //Recuperando a barra de progresso do arquivo de layout xml
         progress = (ProgressBar) findViewById(R.id.progress);
         webView = (WebView) findViewById(R.id.webView);
@@ -37,15 +46,19 @@ public class WebFragmentActivity extends FragmentActivity {
         settings.setAppCacheEnabled(true);
         //settings.setBuiltInZoomControls(false);
 
+        if (!isConnected(getApplicationContext())) {
+            warnDialog();
+        }
+
         //Verificando o estado atual da webview
         //caso seja diferente de null a webview ira exibir
         //a última tela vista pelo usuário
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
         }
         //Caso a instancia ainda não tenha sido executada
         //a URL_SITE é carregada
-        else{
+        else {
             webView.loadUrl(URL_SITE);
         }
 
@@ -71,9 +84,25 @@ public class WebFragmentActivity extends FragmentActivity {
 
     }
 
-    private void setWebViewClient(WebView webview){
+    private boolean isConnected(Context context) {
 
-        webview.setWebViewClient(new WebViewClient(){
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if (networkInfo != null
+                && networkInfo.isConnected()) {
+            Log.d("test", "entrou aqui");
+            return true;
+        }
+
+        return false;
+
+    }
+
+    private void setWebViewClient(WebView webview) {
+
+        webview.setWebViewClient(new WebViewClient() {
 
             @Override
             public void onPageStarted(WebView webview, String url, Bitmap favicon) {
@@ -109,4 +138,22 @@ public class WebFragmentActivity extends FragmentActivity {
         //Restaura o ultimo estado da webview
         webView.restoreState(savedInstanceState);
     }
+
+    protected void warnDialog() {
+        LayoutInflater inflater = getLayoutInflater();
+        dialogBox = inflater.inflate(R.layout.alert_layout, null);
+        AlertDialog.Builder message = new AlertDialog.Builder(this);
+        //message.setTitle(R.string.titleAlertMessage);
+        //message.setMessage(R.string.alertMessage);
+        message.setView(dialogBox);
+        message.create();
+        dialogBox.findViewById(R.id.tvtTitle);
+        dialogBox.findViewById(R.id.btnAlert).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                finish();
+            }
+        });
+        message.show();
+    }
+
 }
