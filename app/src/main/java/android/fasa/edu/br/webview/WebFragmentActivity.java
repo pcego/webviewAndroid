@@ -9,12 +9,14 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 public class WebFragmentActivity extends FragmentActivity {
 
@@ -48,6 +50,7 @@ public class WebFragmentActivity extends FragmentActivity {
 
         if (!isConnected(getApplicationContext())) {
             warnDialog();
+
         }
 
         //Verificando o estado atual da webview
@@ -90,9 +93,9 @@ public class WebFragmentActivity extends FragmentActivity {
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null
-                && networkInfo.isConnected()) {
-            Log.d("test", "entrou aqui");
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+            //Log.d("test", "entrou aqui");
             return true;
         }
 
@@ -140,20 +143,11 @@ public class WebFragmentActivity extends FragmentActivity {
     }
 
     protected void warnDialog() {
-        LayoutInflater inflater = getLayoutInflater();
-        dialogBox = inflater.inflate(R.layout.alert_layout, null);
-        AlertDialog.Builder message = new AlertDialog.Builder(this);
-        //message.setTitle(R.string.titleAlertMessage);
-        //message.setMessage(R.string.alertMessage);
-        message.setView(dialogBox);
-        message.create();
-        dialogBox.findViewById(R.id.tvtTitle);
-        dialogBox.findViewById(R.id.btnAlert).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                finish();
-            }
-        });
+        Toast message = Toast.makeText(this,
+                R.string.alertMessage,Toast.LENGTH_LONG);
+        message.setGravity(Gravity.CENTER,0,0);
         message.show();
+
     }
 
 }
