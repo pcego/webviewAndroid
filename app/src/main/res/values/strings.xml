@@ -3,4 +3,8 @@
     <string name="alertMessage">Sem Conexão com a Internet.</string>
     <string name="titleAlertMessage">Sem Internet</string>
     <string name="buttonAlertTitle">Sair</string>
+    <string name="warnMessage">Deseja Realmente Sair?</string>
+    <string name="titleWarnMessage">Confirmar Saída</string>
+    <string name="btnPositive">Sim</string>
+    <string name="btnNegative">Não</string>
 </resources>

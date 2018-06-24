@@ -1,24 +1,19 @@
 package android.fasa.edu.br.webview;
 
-import android.app.AlertDialog;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
-public class WebFragmentActivity extends FragmentActivity {
+public class WebViewActivity extends AppCompatActivity {
 
     //Para acessar outra url substitua aqui
     private static final String URL_SITE = "https://livearq.com.br/application/prelogin/";
@@ -30,27 +25,20 @@ public class WebFragmentActivity extends FragmentActivity {
     protected SwipeRefreshLayout swipeRefresh;
     //Variável para configuração da webview
     private WebSettings settings;
-    private View dialogBox;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_web);
 
         //Recuperando a barra de progresso do arquivo de layout xml
         progress = (ProgressBar) findViewById(R.id.progress);
         webView = (WebView) findViewById(R.id.webView);
-        //Configurações da webview
-        settings = webView.getSettings();
-        //habilitando execução código javascript
-        settings.setJavaScriptEnabled(true);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        settings.setAppCacheEnabled(true);
-        //settings.setBuiltInZoomControls(false);
+        webViewConfiguration();
 
-        if (!isConnected(getApplicationContext())) {
-            warnDialog();
-
+        // Verifica conexão internet
+        if (!Util.isConnected(this)) {
+            Util.warnDialog(this);
         }
 
         //Verificando o estado atual da webview
@@ -64,9 +52,7 @@ public class WebFragmentActivity extends FragmentActivity {
         else {
             webView.loadUrl(URL_SITE);
         }
-
         setWebViewClient(webView);
-        //Log.d("teste", "testando view");
 
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe);
         //Cores utilizadas na barra de progresso
@@ -87,22 +73,6 @@ public class WebFragmentActivity extends FragmentActivity {
 
     }
 
-    private boolean isConnected(Context context) {
-
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-
-        if (networkInfo != null && networkInfo.isConnected()) {
-            //Log.d("test", "entrou aqui");
-            return true;
-        }
-
-        return false;
-
-    }
-
     private void setWebViewClient(WebView webview) {
 
         webview.setWebViewClient(new WebViewClient() {
@@ -110,7 +80,7 @@ public class WebFragmentActivity extends FragmentActivity {
             @Override
             public void onPageStarted(WebView webview, String url, Bitmap favicon) {
                 super.onPageStarted(webview, url, favicon);
-                //progress.setVisibility(View.VISIBLE);
+                progress.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -142,12 +112,43 @@ public class WebFragmentActivity extends FragmentActivity {
         webView.restoreState(savedInstanceState);
     }
 
-    protected void warnDialog() {
-        Toast message = Toast.makeText(this,
-                R.string.alertMessage,Toast.LENGTH_LONG);
-        message.setGravity(Gravity.CENTER,0,0);
-        message.show();
+    private void webViewConfiguration(){
+        //Configurações da webview
+        settings = webView.getSettings();
+        //habilitando execução código javascript
+        settings.setJavaScriptEnabled(true);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setAppCacheEnabled(true);
+
+        if (android.os.Build.VERSION.SDK_INT >= 21) {
+            CookieManager.getInstance()
+                    .setAcceptThirdPartyCookies(webView, true);
+        }else {
+            CookieManager.getInstance().setAcceptCookie(true);
+        }
+
 
     }
 
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder message = new AlertDialog.Builder(this);
+        message.setTitle(R.string.titleWarnMessage);
+        message.setIcon(R.mipmap.ic_launcher);
+        message.setMessage(R.string.warnMessage)
+                .setCancelable(false).setPositiveButton(R.string.btnPositive,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish();
+                    }
+                })
+                .setNegativeButton(R.string.btnNegative,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        message.show();
+    }
 }
